@@ -1,0 +1,31 @@
+services:
+  # Servicio Web Nginx
+  nginx:
+    image: nginx:latest
+    container_name: nginx-web
+    ports:
+      - "8080:80"      # HTTP
+      - "8443:443"     # HTTPS
+    volumes:
+      - web-content:/usr/share/nginx/html
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+      - ./gzip.conf:/etc/nginx/conf.d/gzip.conf
+      - ./certs:/etc/ssl/certs/nginx
+    depends_on:
+      - sftp
+    restart: unless-stopped
+
+  # Servicio SFTP para transferencia de archivos
+  sftp:
+    image: atmoz/sftp
+    container_name: sftp-server
+    ports:
+      - "2222:22"
+    volumes:
+      - web-content:/home/usuario/upload
+    command: usuario:password:1001
+    restart: unless-stopped
+
+# Volumen compartido entre ambos servicios
+volumes:
+  web-content:
